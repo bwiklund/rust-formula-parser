@@ -7,7 +7,7 @@ pub struct Ctx {
 }
 
 pub fn parse(code: &str) -> Result<Expr, String> {
-  let tokens = lex(code);
+  let tokens = lex(code)?;
   let mut ctx = Ctx { tokens, idx: 0 };
   return parse_bin_op_or_expr(&mut ctx);
 }

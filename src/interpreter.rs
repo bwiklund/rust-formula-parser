@@ -2,18 +2,14 @@ use crate::ast::{Expr, Operator};
 
 pub fn eval(expr: &Expr) -> f64 {
   return match expr {
-    Expr::Call { args, target } =>
-    // TODO actually define fns. for now lets just sum all args i guess
-    {
-      match target.as_str() {
-        "Pi" => std::f64::consts::PI,
-        "Sin" => eval(&args[0]).sin(),
-        "Cos" => eval(&args[0]).cos(),
-        "Tan" => eval(&args[0]).tan(),
-        "Sum" => sum(&args),
-        _ => panic!("unknown function: {}", target),
-      }
-    }
+    Expr::Call { args, target } => match target.as_str() {
+      "Pi" => std::f64::consts::PI,
+      "Sin" => eval(&args[0]).sin(),
+      "Cos" => eval(&args[0]).cos(),
+      "Tan" => eval(&args[0]).tan(),
+      "Sum" => sum(&args),
+      _ => panic!("unknown function: {}", target),
+    },
 
     Expr::Num { val } => *val,
 

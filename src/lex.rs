@@ -24,7 +24,7 @@ struct Matcher {
   keep: bool,
 }
 
-pub fn lex(input: &str) -> Vec<Token> {
+pub fn lex(input: &str) -> Result<Vec<Token>, String> {
   let matchers: Vec<Matcher> = vec![
     Matcher {
       re: regex::Regex::new(r"^[\s\n]+").unwrap(),
@@ -86,9 +86,8 @@ pub fn lex(input: &str) -> Vec<Token> {
       }
     }
     if !found_match {
-      println!("oops");
-      break;
-    }; // holler
+      return Err(format!("Could not parse token at idx: {}", idx));
+    };
   }
-  return tokens;
+  return Ok(tokens);
 }
