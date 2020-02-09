@@ -10,7 +10,7 @@ pub fn eval(expr: &Expr) -> Result<f64, String> {
 
       let res = match target.as_str() {
         "Pi" => std::f64::consts::PI,
-        "Sin" => arg_results[0].sin(),
+        "Sin" => arg_results[0].sin(), // how to index a vec or return Err in a not verbose way here?
         "Cos" => arg_results[0].cos(),
         "Tan" => arg_results[0].tan(),
         "Sum" => sum(&arg_results),

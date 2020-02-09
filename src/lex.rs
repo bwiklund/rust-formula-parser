@@ -1,7 +1,7 @@
 use regex;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub enum TokenType {
+pub enum TokenTy {
   Whitespace,
   Ident,
   Number,
@@ -15,55 +15,19 @@ pub enum TokenType {
 #[derive(Clone, Debug)]
 pub struct Token {
   pub text: String,
-  pub ty: TokenType,
+  pub ty: TokenTy,
 }
 
 struct Matcher {
   re: regex::Regex,
-  ty: TokenType,
+  ty: TokenTy,
   keep: bool,
 }
 
 pub fn lex(input: &str) -> Result<Vec<Token>, String> {
-  let matchers: Vec<Matcher> = vec![
-    Matcher {
-      re: regex::Regex::new(r"^[\s\n]+").unwrap(),
-      ty: TokenType::Whitespace,
-      keep: false,
-    },
-    Matcher {
-      re: regex::Regex::new(r"^[a-zA-Z][a-zA-Z0-9]*").unwrap(),
-      ty: TokenType::Ident,
-      keep: true,
-    },
-    Matcher {
-      re: regex::Regex::new(r"^[0-9]+(\.[0-9]+)?").unwrap(),
-      ty: TokenType::Number,
-      keep: true,
-    },
-    Matcher {
-      re: regex::Regex::new(r"^\(").unwrap(),
-      ty: TokenType::LParen,
-      keep: true,
-    },
-    Matcher {
-      re: regex::Regex::new(r"^\)").unwrap(),
-      ty: TokenType::RParen,
-      keep: true,
-    },
-    Matcher {
-      re: regex::Regex::new(r"^,").unwrap(),
-      ty: TokenType::Comma,
-      keep: true,
-    },
-    Matcher {
-      re: regex::Regex::new(r"^[+\-\*/]").unwrap(),
-      ty: TokenType::Operator,
-      keep: true,
-    },
-  ];
+  let matchers = build_matchers();
 
-  let mut tokens = Vec::new();
+  let mut tokens = vec![];
   let mut idx = 0;
   while idx < input.len() {
     let mut found_match = false;
@@ -90,4 +54,44 @@ pub fn lex(input: &str) -> Result<Vec<Token>, String> {
     };
   }
   return Ok(tokens);
+}
+
+fn build_matchers() -> Vec<Matcher> {
+  return vec![
+    Matcher {
+      re: regex::Regex::new(r"^[\s\n]+").unwrap(),
+      ty: TokenTy::Whitespace,
+      keep: false,
+    },
+    Matcher {
+      re: regex::Regex::new(r"^[a-zA-Z][a-zA-Z0-9]*").unwrap(),
+      ty: TokenTy::Ident,
+      keep: true,
+    },
+    Matcher {
+      re: regex::Regex::new(r"^[0-9]+(\.[0-9]+)?").unwrap(),
+      ty: TokenTy::Number,
+      keep: true,
+    },
+    Matcher {
+      re: regex::Regex::new(r"^\(").unwrap(),
+      ty: TokenTy::LParen,
+      keep: true,
+    },
+    Matcher {
+      re: regex::Regex::new(r"^\)").unwrap(),
+      ty: TokenTy::RParen,
+      keep: true,
+    },
+    Matcher {
+      re: regex::Regex::new(r"^,").unwrap(),
+      ty: TokenTy::Comma,
+      keep: true,
+    },
+    Matcher {
+      re: regex::Regex::new(r"^[+\-\*/]").unwrap(),
+      ty: TokenTy::Operator,
+      keep: true,
+    },
+  ];
 }

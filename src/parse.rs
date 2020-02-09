@@ -1,5 +1,5 @@
 use crate::ast::{Expr, Operator};
-use crate::lex::{lex, Token, TokenType};
+use crate::lex::{lex, Token, TokenTy};
 
 pub struct Ctx {
   tokens: Vec<Token>,
@@ -16,7 +16,7 @@ fn peek(ctx: &mut Ctx) -> Token {
   if ctx.idx >= ctx.tokens.len() {
     return Token {
       text: String::from(""),
-      ty: TokenType::EOF,
+      ty: TokenTy::EOF,
     };
   }
   return ctx.tokens[ctx.idx].clone();
@@ -29,7 +29,7 @@ fn consume(ctx: &mut Ctx) -> Token {
 }
 
 // TODO all these should be Result
-fn expect(ctx: &mut Ctx, ty: TokenType) -> Result<Token, String> {
+fn expect(ctx: &mut Ctx, ty: TokenTy) -> Result<Token, String> {
   let tok = consume(ctx);
   if tok.ty != ty {
     return Err(format!("expected: {:?}, found {:?}", ty, tok.ty));
@@ -44,7 +44,7 @@ fn parse_bin_op_or_expr(ctx: &mut Ctx) -> Result<Expr, String> {
   // TODO: do precidence and associativity as a post processing step at the end of this fn.
 
   let mut expr = parse_expr(ctx)?;
-  while peek(ctx).ty == TokenType::Operator {
+  while peek(ctx).ty == TokenTy::Operator {
     let op_token = consume(ctx);
     let op = match op_token.text.as_str() {
       "+" => Operator::Plus,
@@ -62,26 +62,26 @@ fn parse_bin_op_or_expr(ctx: &mut Ctx) -> Result<Expr, String> {
 
 fn parse_expr(ctx: &mut Ctx) -> Result<Expr, String> {
   return match peek(ctx).ty {
-    TokenType::Ident => parse_call(ctx),
-    TokenType::Number => parse_num(ctx),
-    TokenType::LParen => parse_paren_expr(ctx),
+    TokenTy::Ident => parse_call(ctx),
+    TokenTy::Number => parse_num(ctx),
+    TokenTy::LParen => parse_paren_expr(ctx),
     t => Err(format!("unexpected token: {:?}", t)),
   };
 }
 
 fn parse_paren_expr(ctx: &mut Ctx) -> Result<Expr, String> {
-  expect(ctx, TokenType::LParen)?;
+  expect(ctx, TokenTy::LParen)?;
   let expr = parse_bin_op_or_expr(ctx);
-  expect(ctx, TokenType::RParen)?;
+  expect(ctx, TokenTy::RParen)?;
 
   return expr;
 }
 
 fn parse_call(ctx: &mut Ctx) -> Result<Expr, String> {
-  let tok = expect(ctx, TokenType::Ident)?;
-  expect(ctx, TokenType::LParen)?;
+  let tok = expect(ctx, TokenTy::Ident)?;
+  expect(ctx, TokenTy::LParen)?;
   let args = parse_args(ctx)?;
-  expect(ctx, TokenType::RParen)?;
+  expect(ctx, TokenTy::RParen)?;
 
   return Ok(Expr::Call {
     target: tok.text.clone(),
@@ -90,7 +90,7 @@ fn parse_call(ctx: &mut Ctx) -> Result<Expr, String> {
 }
 
 fn parse_num(ctx: &mut Ctx) -> Result<Expr, String> {
-  let tok = expect(ctx, TokenType::Number)?;
+  let tok = expect(ctx, TokenTy::Number)?;
   return Ok(Expr::Num {
     val: tok.text.parse::<f64>().unwrap(),
   });
@@ -99,11 +99,11 @@ fn parse_num(ctx: &mut Ctx) -> Result<Expr, String> {
 fn parse_args(ctx: &mut Ctx) -> Result<Vec<Expr>, String> {
   let mut args = vec![];
 
-  while peek(ctx).ty != TokenType::RParen {
+  while peek(ctx).ty != TokenTy::RParen {
     let arg = parse_bin_op_or_expr(ctx)?;
     args.push(arg);
 
-    if peek(ctx).ty == TokenType::Comma {
+    if peek(ctx).ty == TokenTy::Comma {
       consume(ctx);
     }
   }
