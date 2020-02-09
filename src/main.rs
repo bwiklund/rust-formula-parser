@@ -7,5 +7,17 @@ use interpreter::eval;
 use parse::parse;
 
 fn main() {
-  println!("{:?}", eval(&parse("Sum(2 + 2, 2 + 2)").unwrap()));
+  let args: Vec<String> = std::env::args().collect();
+  if args.len() < 2 {
+    println!("Usage: rformula \"Cos(Pi() * 2)\"")
+  } else {
+    match run(args[1].as_str()) {
+      Ok(res) => println!("{}", res),
+      Err(msg) => println!("Error: {}", msg),
+    }
+  }
+}
+
+fn run(code: &str) -> Result<f64, String> {
+  return eval(&parse(code)?);
 }

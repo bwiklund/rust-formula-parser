@@ -1,31 +1,49 @@
 use crate::ast::{Expr, Operator};
 
-pub fn eval(expr: &Expr) -> f64 {
+pub fn eval(expr: &Expr) -> Result<f64, String> {
   return match expr {
-    Expr::Call { args, target } => match target.as_str() {
-      "Pi" => std::f64::consts::PI,
-      "Sin" => eval(&args[0]).sin(),
-      "Cos" => eval(&args[0]).cos(),
-      "Tan" => eval(&args[0]).tan(),
-      "Sum" => sum(&args),
-      _ => panic!("unknown function: {}", target),
-    },
+    Expr::Call { args, target } => {
+      let mut arg_results = vec![];
+      for arg in args {
+        arg_results.push(eval(arg)?);
+      }
 
-    Expr::Num { val } => *val,
+      let res = match target.as_str() {
+        "Pi" => std::f64::consts::PI,
+        "Sin" => arg_results[0].sin(),
+        "Cos" => arg_results[0].cos(),
+        "Tan" => arg_results[0].tan(),
+        "Sum" => sum(&arg_results),
+        _ => return Err(format!("unknown function: {}", target)),
+      };
 
-    Expr::BinOp { op, a, b } => match op {
-      Operator::Plus => eval(a) + eval(b),
-      Operator::Minus => eval(a) - eval(b),
-      Operator::Multiply => eval(a) * eval(b),
-      Operator::Divide => eval(a) / eval(b),
-    },
+      return Ok(res);
+    }
+
+    Expr::Num { val } => Ok(*val),
+
+    Expr::BinOp {
+      op,
+      a: a_node,
+      b: b_node,
+    } => {
+      let a = eval(a_node)?;
+      let b = eval(b_node)?;
+      let res = match op {
+        Operator::Plus => a + b,
+        Operator::Minus => a - b,
+        Operator::Multiply => a * b,
+        Operator::Divide => a / b,
+      };
+      return Ok(res);
+    }
   };
 }
 
-fn sum(args: &Vec<Expr>) -> f64 {
+fn sum(args: &Vec<f64>) -> f64 {
   let mut sum: f64 = 0.0;
   for arg in args {
-    sum += eval(arg);
+    sum += arg;
   }
   return sum;
 }
