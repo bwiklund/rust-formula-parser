@@ -13,7 +13,7 @@ mod tests {
     }
 
     fn parse_and_eval(code: &str, expected: f64) {
-        assert_delta!(eval(&parse(code).unwrap()).unwrap(), expected, 1e-6);
+        assert_delta!(eval(parse(code).unwrap()).unwrap(), expected, 1e-6);
     }
 
     #[test]
