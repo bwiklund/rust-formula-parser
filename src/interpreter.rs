@@ -1,12 +1,9 @@
 use crate::ast::{Expr, Operator};
 
-pub fn eval(expr: &Expr) -> Result<f64, String> {
+pub fn eval(expr: Expr) -> Result<f64, String> {
     match expr {
         Expr::Call { args, target } => {
-            let mut arg_results = vec![];
-            for arg in args {
-                arg_results.push(eval(arg)?);
-            }
+            let arg_results = args.into_iter().map(eval).collect::<Result<Vec<_>, _>>()?;
 
             let res = match target.as_str() {
                 "Pi" => std::f64::consts::PI,
@@ -20,15 +17,15 @@ pub fn eval(expr: &Expr) -> Result<f64, String> {
             Ok(res)
         }
 
-        Expr::Num { val } => Ok(*val),
+        Expr::Num { val } => Ok(val),
 
         Expr::BinOp {
             op,
             a: a_node,
             b: b_node,
         } => {
-            let a = eval(a_node)?;
-            let b = eval(b_node)?;
+            let a = eval(*a_node)?;
+            let b = eval(*b_node)?;
             let res = match op {
                 Operator::Plus => a + b,
                 Operator::Minus => a - b,

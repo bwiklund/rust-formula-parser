@@ -3,6 +3,7 @@ mod interpreter;
 mod lex;
 mod parse;
 mod test;
+
 use interpreter::eval;
 use parse::parse;
 
@@ -19,5 +20,5 @@ fn main() {
 }
 
 fn run(code: &str) -> Result<f64, String> {
-    eval(&parse(code)?)
+    eval(parse(code)?)
 }
