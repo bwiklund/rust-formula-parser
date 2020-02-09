@@ -13,8 +13,8 @@ pub enum TokenTy {
 }
 
 #[derive(Clone, Debug)]
-pub struct Token {
-    pub text: String,
+pub struct Token<'a> {
+    pub text: &'a str,
     pub ty: TokenTy,
 }
 
@@ -24,7 +24,10 @@ struct Matcher {
     keep: bool,
 }
 
-pub fn lex(input: &str) -> Result<Vec<Token>, String> {
+// A token contains a slice of the input text. As such we can
+// declare that the token's lifetime will not outlive that of
+// the input text - this is the behavior of the lifetime `'a`
+pub fn lex<'a>(input: &'a str) -> Result<Vec<Token<'a>>, String> {
     let matchers = build_matchers();
 
     let mut tokens = vec![];
@@ -36,7 +39,7 @@ pub fn lex(input: &str) -> Result<Vec<Token>, String> {
             match match_res {
                 Some(x) => {
                     let tok = Token {
-                        text: String::from(x.as_str()),
+                        text: x.as_str(),
                         ty: matcher.ty,
                     };
                     idx += tok.text.len();
